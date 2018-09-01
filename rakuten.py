@@ -1,6 +1,7 @@
 import requests, webbrowser, sys, re, json
 from pprint import pprint
 from bs4 import BeautifulSoup
+from collections import OrderedDict
 
 '''
 gあたりの単価が低い順に表示(途中)
@@ -10,28 +11,51 @@ proxies = {"http": "172.16.40.1:8888", "https": "172.16.40.1:8888"}
 url = requests.get("https://search.rakuten.co.jp/search/mall/%E3%83%9F%E3%83%83%E3%82%AF%E3%82%B9%E3%83%8A%E3%83%83%E3%83%84/", verify=False).content
 soup = BeautifulSoup(url)
 
+api = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?applicationId=1098885711835405419&keyword=ミックスナッツ"
+res = requests.get(api)
+json_data = json.loads(res.text)
 
-def title():
+result = json_data["Items"]
+
+
+def item_name(n):
     '''
     商品名を取得
     '''
-    title_list = []
-    for item in soup.find_all("a", attrs={"data-track-trigger": "title", "target": "_top"}):
-        title = item.get("title")
-        if title is None:
-            continue
-        title_list.append(title)
-    return title_list
+    name_list = []
+    for i in range(n):
+        name_list.append((result[i]["Item"]["itemName"]))
+    return(name_list)
 
 
-def weight():
+def item_url(n):
     '''
-    各商品の重さのみを取得(kgはgに変換)
+    URLを取得
+    '''
+    url_list = []
+    for i in range(n):
+        url_list.append((result[i]["Item"]["itemUrl"]))
+    return(url_list)
+
+
+def item_price(n):
+    '''
+    商品の価格を取得
+    '''
+    price_list = []
+    for i in range(n):
+        price_list.append((result[i]["Item"]["itemPrice"]))
+    return price_list
+
+
+def weight(n):
+    '''
+    各商品の名前から重さのみを取得(kgはgに変換)
     '''
     weight_list = []
     pattern = re.compile(r"(\d+)(kg|g)")
 
-    for word in title():
+    for word in item_name(n):
         i = pattern.search(word)
         if i is None:
             weight_list.append(1)
@@ -42,52 +66,18 @@ def weight():
     return weight_list
 
 
-def price():
-    '''
-    商品の価格を取得
-    '''
-    price_list = []
-    for item in soup.select(".important"):
-        price_list.append(item.text)
-    return price_list
+# 商品の単価を計算
+yen_per_kg = [x / y for (x, y) in zip(item_price(30), weight(30))]
 
 
-def price_num():
-    '''
-    価格の数字のみ取得
-    '''
-    plist = []
-    pattern = re.compile(r"(\d,\d+)円")
-    for word in price():
-        i = pattern.search(word)
-        if i is None:
-            plist.append(1)
-        else:
-            plist.append(int(i.group(1).replace(",", "")))
-    return plist
+# {単価:商品名}の辞書
+price_dict = sorted(dict(zip(yen_per_kg, item_name(30))).items())
 
 
-def take_source():
-    '''
-    URLを取得
-    '''
-    api = "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20170706?applicationId=1098885711835405419&keyword=ミックスナッツ"
-    res = requests.get(api)
-    json_data = json.loads(res.text)
-    result = json_data["Items"]
-    pprint(json_data)
-
-    url_list = []
-    for i in range(30):
-        url_list.append((result[i]["Item"]["itemUrl"]))
-    print(url_list)
+# {単価:URL}の辞書
+url_dict = sorted(dict(zip(yen_per_kg, item_url(30))).items())
 
 
-take_source()
-
-
-'''
-商品の単価を計算
-yen_per_kg = [x / y for (x, y) in zip(price_num(), weight())]
-print(yen_per_kg)
-'''
+print("\単価が安い順ランキング/")
+for i, name in enumerate(price_dict, 1):
+    print("{}位\n ".format(i), name[1])
