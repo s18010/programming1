@@ -3,11 +3,11 @@ from pprint import pprint
 from bs4 import BeautifulSoup
 
 '''
-gあたりの単価が低い順に出力(途中)
+gあたりの単価が低い順に表示(途中)
 '''
 
 proxies = {"http": "172.16.40.1:8888", "https": "172.16.40.1:8888"}
-url = requests.get("https://search.rakuten.co.jp/search/mall/%E3%83%9F%E3%83%83%E3%82%AF%E3%82%B9%E3%83%8A%E3%83%83%E3%83%84/", proxies=proxies).content
+url = requests.get("https://search.rakuten.co.jp/search/mall/%E3%83%9F%E3%83%83%E3%82%AF%E3%82%B9%E3%83%8A%E3%83%83%E3%83%84/", verify=False).content
 soup = BeautifulSoup(url)
 
 
@@ -67,11 +67,6 @@ def price_num():
     return plist
 
 
-# 商品の重さと値段を辞書に入れる
-dic = dict(zip(weight(), price_num()))
-# print(dic)
-
-
 def take_source():
     '''
     URLを取得
@@ -83,13 +78,16 @@ def take_source():
     pprint(json_data)
 
     url_list = []
-    for i in range(40):
+    for i in range(30):
         url_list.append((result[i]["Item"]["itemUrl"]))
-        pass
+    print(url_list)
 
 
 take_source()
 
 
-# yen_per_kg = [x / y for (x, y) in zip(price_num(), weight())]
-# print(yen_per_kg)
+'''
+商品の単価を計算
+yen_per_kg = [x / y for (x, y) in zip(price_num(), weight())]
+print(yen_per_kg)
+'''
