@@ -55,7 +55,7 @@ def weight(n):
     各商品の名前から重さのみを取得(kgはgに変換)
     '''
     weight_list = []
-    pattern = re.compile(r"(\d+)(kg|g)")
+    pattern = re.compile(r"(\d.\d|\d+)(kg|g)")
 
     for word in item_name(n):
         i = pattern.search(word)
