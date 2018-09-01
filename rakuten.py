@@ -4,8 +4,8 @@ from bs4 import BeautifulSoup
 from collections import OrderedDict
 
 '''
-gあたりの単価が低い順に表示(途中)
-(.が入った重さを正規表現するとうエラーが出る)
+グラムあたりの単価が低い順に表示(途中)
+(.が入った重さを正規表現するとbase10 valueError)
 '''
 
 proxies = {"http": "172.16.40.1:8888", "https": "172.16.40.1:8888"}
@@ -22,6 +22,7 @@ result = json_data["Items"]
 def item_name(n):
     '''
     商品名を取得
+    (itemNameの個数がわからないので、一旦適当な数を取得)
     '''
     name_list = []
     for i in range(n):
@@ -81,17 +82,16 @@ url_dict = sorted(dict(zip(yen_per_kg, item_url(30))).items())
 sorted_url_list = [i[1] for i in url_dict]
 
 
-# itemとurlをくっつける
 def item_url():
-    for item, url in zip(sorted_title_list, sorted_url_list):
-        print(item, url)
+    '''
+    itemとurlをくっつける
+    '''
+    item_url = list(zip(sorted_title_list, sorted_url_list))
+    return item_url
 
 
-item_url()
-
-'''
-unfinished
 print("\単価が安い順ランキング/")
 for i, name in enumerate(item_url(), 1):
-    print("{}位\n ".format(i), name[1])
-'''
+    print("{}位: ".format(i), name[0])
+    print(name[1])
+    print()
