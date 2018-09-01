@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+'''
+現在の英ポンド/円の為替相場を表示
+'''
 
 from bs4 import BeautifulSoup
 import requests
