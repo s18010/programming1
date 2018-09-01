@@ -5,6 +5,7 @@ from collections import OrderedDict
 
 '''
 gあたりの単価が低い順に表示(途中)
+(.が入った重さを正規表現するとうエラーが出る)
 '''
 
 proxies = {"http": "172.16.40.1:8888", "https": "172.16.40.1:8888"}
@@ -70,14 +71,27 @@ def weight(n):
 yen_per_kg = [x / y for (x, y) in zip(item_price(30), weight(30))]
 
 
-# {単価:商品名}の辞書
+# 商品名を安い順に並べる
 price_dict = sorted(dict(zip(yen_per_kg, item_name(30))).items())
+sorted_title_list = [i[1] for i in price_dict]
 
 
-# {単価:URL}の辞書
+# URLを安い順に並べる
 url_dict = sorted(dict(zip(yen_per_kg, item_url(30))).items())
+sorted_url_list = [i[1] for i in url_dict]
 
 
+# itemとurlをくっつける
+def item_url():
+    for item, url in zip(sorted_title_list, sorted_url_list):
+        print(item, url)
+
+
+item_url()
+
+'''
+unfinished
 print("\単価が安い順ランキング/")
-for i, name in enumerate(price_dict, 1):
+for i, name in enumerate(item_url(), 1):
     print("{}位\n ".format(i), name[1])
+'''
